@@ -1,38 +1,17 @@
 class Node:
-    def __init__(self, value):
-        self.left = None
-        self.right = None
+    # left - ссылка на левого ребенка
+    # right - ссылка на правого ребенка
+    # value - символ, по умолчанию ничего
+    # frequency - частота появления символа
+    def __init__(self, left=None, right=None, value=None, frequency=0):
+        self.left = left
+        self.right = right
         self.value = value
+        self.frequency = frequency
 
-
-class Tree:
-    def __init__(self):
-        self.root = None
-
-    def add(self, value):
-        if self.root is None:
-            self.root = Node(value)
+    def order_to_show(node, str=""):
+        if node.value is None:
+            Node.order_to_show(node.left, str + "0")
+            Node.order_to_show(node.right, str + "1")
         else:
-            self._add(value, self.root)
-
-    def _add(self, value, node):
-        if value < node.value:
-            if node.left is None:
-                node.left = Node(value)
-            else:
-                self._add(value, node.left)
-        else:
-            if node.right is None:
-                node.right = Node(value)
-            else:
-                self._add(value, node.right)
-
-    def pre_order(self):
-        if self.root is not None:
-            self._pre_order(self.root)
-
-    def _pre_order(self, node):
-        if node is not None:
-            print(node.value)
-            self._pre_order(node.left)
-            self._pre_order(node.right)
+            print(f"{node.value} - {str}")
