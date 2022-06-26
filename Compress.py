@@ -116,4 +116,5 @@ class Compress:
                     size_of_input_string -= 1
                     if size_of_input_string <= 0:
                         break
+        f.close()
         return result
