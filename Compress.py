@@ -1,11 +1,10 @@
-from email.mime import message
 from PriorityQueue import PriorityQueue
 from Node import Node
 
 
 class Compress:
     # create a compress object, name - name of file to compress
-    def __init__(self, name="input.txt", output="output.txt"):
+    def __init__(self, name="input.txt", output="output.bin"):
         self.name = name
         self.output = output
         self.string_to_compress = self.get_string_to_comress()
@@ -55,36 +54,66 @@ class Compress:
                 if bit < 128:
                     bit <<= 1
                 else:
-                    bits.append(sum)
+                    bits.append(sum.to_bytes(1, byteorder="big"))
                     sum = 0
                     bit = 1
         if bit > 1:
-            bits.append(sum)
+            bits.append(sum.to_bytes(1, byteorder="big"))
         return bits
+
+    # create header file: lenght, dictionary of compressed codes
+    def create_header(self):
+        header = []
+        header.append(
+            len(self.string_to_compress).to_bytes(4, byteorder="big"))
+        dic = self.get_compressed_codes()
+        header.append(len(dic).to_bytes(1, byteorder="big"))
+        for value, code in dic.items():
+            header.append(value.encode())
+            header.append(len(code).to_bytes(1, byteorder="big"))
+            header.append(code.encode())
+        return header
 
     # write message in output file
     def write_message(self):
         f = open(self.output, 'wb')
-        compressed_string = ""
+        res = self.create_header() + self.get_bits_array()
+        for el in res:
+            f.write(el)
         f.close()
 
-    # function to test
     def decode_message(self):
+        def get_correct_string(s):
+            l = list(s)
+            l.reverse()
+            while len(l) < 8:
+                l.append("0")
+            return "".join(l)
+
         def get_key(d, value):
             for k, v in d.items():
                 if v == value:
                     return k
-        self.write_message()
-        codes = self.get_compressed_codes()
-        f = open(self.output, 'r')
-        compressed_string = f.read()
-        n = int(compressed_string, 2)
-        n.to_bytes((n.bit_length() + 7) // 8, 'big').decode()
+        f = open(self.output, 'rb')
+        size_of_input_string = int.from_bytes(
+            f.read(4), "big")
+        size_of_dic = int.from_bytes(f.read(1), "big")
+        d = dict()
+        for _ in range(size_of_dic):
+            k = f.read(1)
+            s = int.from_bytes(f.read(1), "big")
+            v = f.read(s)
+            d[k.decode()] = v.decode()
         result = ""
-        cur_str = ""
-        for letter in compressed_string:
-            cur_str += letter
-            if cur_str in codes.values():
-                result += get_key(d=codes, value=cur_str)
-                cur_str = ""
+        coded_string = f.readline()
+        code = ""
+        for bt in coded_string:
+            for i in get_correct_string("{0:b}".format(bt)):
+                code += i
+                if code in d.values():
+                    result += get_key(d, code)
+                    code = ""
+                    size_of_input_string -= 1
+                    if size_of_input_string <= 0:
+                        break
         return result
