@@ -7,7 +7,6 @@ class Compress:
     def __init__(self, name="input.txt", output="output.bin"):
         self.name = name
         self.output = output
-        self.string_to_compress = self.get_string_to_comress()
 
     # return string to compress
     def get_string_to_comress(self):
@@ -47,7 +46,7 @@ class Compress:
         bits = []
         sum = 0
         bit = 1
-        for symbol in self.string_to_compress:
+        for symbol in self.get_string_to_comress():
             for c in codes[symbol]:
                 if c == '1':
                     sum |= bit
@@ -65,7 +64,7 @@ class Compress:
     def create_header(self):
         header = []
         header.append(
-            len(self.string_to_compress).to_bytes(4, byteorder="big"))
+            len(self.get_string_to_comress()).to_bytes(4, byteorder="big"))
         dic = self.get_compressed_codes()
         header.append(len(dic).to_bytes(1, byteorder="big"))
         for value, code in dic.items():
@@ -82,6 +81,7 @@ class Compress:
             f.write(el)
         f.close()
 
+    # return decoded message
     def decode_message(self):
         def get_correct_string(s):
             l = list(s)
@@ -118,3 +118,8 @@ class Compress:
                         break
         f.close()
         return result
+
+    def write_decoded_result(self):
+        result = self.decode_message()
+        with open(self.name, "w") as f:
+            f.write(result)
