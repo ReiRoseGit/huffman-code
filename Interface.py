@@ -39,9 +39,9 @@ class Interface(tk.Tk):
             self.show_warning()
 
     def show_info(self):
-        msg = "Готово!"
-        mb.showinfo("Информация", msg)
+        msg = "Success!"
+        mb.showinfo("Success", msg)
 
     def show_warning(self):
-        msg = "Неккоректный ввод"
-        mb.showwarning("Предупреждение", msg)
+        msg = "Invalid data"
+        mb.showwarning("Warning", msg)
